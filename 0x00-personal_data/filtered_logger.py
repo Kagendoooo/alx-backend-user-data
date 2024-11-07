@@ -73,3 +73,22 @@ def get_db() -> mysql.connector.connection.MySQLConnection:
         database=db_name
     )
     return connection
+
+
+def main() -> None:
+    """Obtain database connection"""
+    logger = get_logger()
+    logger.setLevel(logging.INFO)
+
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users")
+    rows = cursor.fetchall()
+    for row in rows:
+        message = "; ".join([f"{field}={row[field]}" for field in row.keys()])
+        logger.info(filter_datum(PII_FIELDS, RedactingFormatter.REDACTION,
+                                 message, RedactingFormatter.SEPARATOR))
+
+
+if __name__ == "__main__":
+    main()
