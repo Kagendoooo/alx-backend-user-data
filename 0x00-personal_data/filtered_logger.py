@@ -6,7 +6,7 @@ import re
 from typing import List
 import logging
 
-PII_FIELDS = ("name", "email", "ssn", "password", "phone_number")
+PII_FIELDS = ("name", "email", "password", "phone", "ssn")
 
 patterns = {
         'extract': lambda x, y: r'(?P<field>{})=[^{}]*'.format('|'.join(x), y),
