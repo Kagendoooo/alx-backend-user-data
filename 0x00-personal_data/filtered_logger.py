@@ -6,6 +6,8 @@ import re
 from typing import List
 import logging
 
+PII_FIELDS = ("name", "email", "ssn", "password", "phone_number")
+
 patterns = {
         'extract': lambda x, y: r'(?P<field>{})=[^{}]*'.format('|'.join(x), y),
         'replace': lambda x: r'\g<field>={}'.format(x),
@@ -41,3 +43,16 @@ class RedactingFormatter(logging.Formatter):
         record.msg = filter_datum(
                 self.fields, self.REDACTION, record.msg, self.SEPARATOR)
         return super().format(record)
+
+
+def get_logger() -> logging.Logger:
+    """Creates and configures a logger for user data with redaction."""
+    logger = logging.getLogger("user_data")
+    logger.setLevel(logging.INFO)
+    logger.propagate = False
+
+    stream_handler = logging.StreamHandler()
+    stream_handler.setFormatter(RedactingFormatter(fields=PII_FIELDS))
+
+    logger.addHandler(stream_handler)
+    return logger
