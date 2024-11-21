@@ -7,7 +7,7 @@ from db import DB
 from user import User
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm.exc import NoResultFound
-import iuud
+import uuid
 
 
 def _hash_password(password: str) -> bytes:
