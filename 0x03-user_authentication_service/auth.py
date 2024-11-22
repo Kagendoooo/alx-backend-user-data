@@ -31,8 +31,8 @@ class Auth:
 
     def register_user(self, email: str, password: str) -> User:
         try:
-            if self._db.find_user_by(email=email):
-                raise ValueError(f"User {email} already exists")
+            self._db.find_user_by(email=email)
+            raise ValueError(f"User {email} already exists")
         except NoResultFound:
             hashed_password = _hash_password(password)
             user = self._db.add_user(email, hashed_password.decode('utf-8'))
@@ -64,13 +64,13 @@ class Auth:
 
     def get_user_from_session_id(self, session_id: str) -> User:
         """Return the user corresponding to the given session ID or None"""
-        if not session_id:
+        if session_id is None:
             return None
         try:
             user = self._db.find_user_by(session_id=session_id)
-            return user
         except NoResultFound:
             return None
+        return user
 
     def destroy_session(self, user_id: int) -> None:
         """Update the user's session ID to None"""
@@ -80,11 +80,13 @@ class Auth:
         """Generate token to reset password."""
         try:
             user = self._db.find_user_by(email=email)
-            reset_token = str(uuid.uuid4())
-            self._db.update_user(user.id, reset_token=reset_token)
-            return reset_token
         except NoResultFound:
+            user = None
+        if user is None:
             raise ValueError()
+        reset_token = str(uuid.uuid4())
+        self._db.update_user(user.id, reset_token=reset_token)
+        return reset_token
 
     def update_password(self, reset_token: str, password: str) -> None:
         """update password using the reset token"""
